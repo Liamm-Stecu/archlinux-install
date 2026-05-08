@@ -1,25 +1,23 @@
-# 🐧 Arch Linux Dual Boot Installation Guide
+# 🐧 Arch Linux Dual Boot Installation (archinstall)
 
-> Install Arch Linux dual boot dengan Windows menggunakan UEFI mode.
+> Install Arch Linux dual boot dengan Windows menggunakan `archinstall`.
 
 ---
 
-# 📦 Persiapan Sebelum Install
+# 📦 Persiapan
 
 ## Yang Dibutuhkan
 
 - Flashdisk minimal 8GB
-- File ISO Arch Linux
-- Aplikasi bootable USB:
-  - Rufus (Windows)
-  - Ventoy
-  - Balena Etcher
+- ISO Arch Linux
+- Rufus / Ventoy
+- Koneksi internet
 
 ---
 
 # 🔽 Download Arch Linux
 
-Download ISO resmi:
+Official website:
 
 ```txt
 https://archlinux.org/download/
@@ -34,19 +32,20 @@ https://archlinux.org/download/
 1. Buka Rufus
 2. Pilih flashdisk
 3. Select ISO Arch Linux
-4. Partition scheme:
-   - GPT → untuk UEFI
-5. Start
+4. Partition Scheme:
+   - GPT → UEFI
+   - MBR → BIOS / Legacy
+5. Klik Start
 
 ---
 
-# ⚠️ Persiapan Dual Boot Windows
+# ⚠️ Persiapan Windows Dual Boot
 
-## Disable Fast Startup Windows
+## Disable Fast Startup
 
 1. Control Panel
 2. Power Options
-3. Choose what power buttons do
+3. Choose what the power buttons do
 4. Disable:
    - `Turn on fast startup`
 
@@ -57,24 +56,18 @@ https://archlinux.org/download/
 ## Dari Windows
 
 1. Tekan `Win + X`
-2. Pilih:
-   - Disk Management
+2. Disk Management
 3. Klik kanan drive Windows
-4. Pilih:
-   - Shrink Volume
-5. Sisakan minimal:
+4. Shrink Volume
+5. Sisakan:
    - 30GB+
-
-Nanti akan menjadi:
-- `Unallocated Space`
+   - Akan menjadi `Unallocated`
 
 ---
 
 # 🚀 Boot ke Arch Linux
 
-## Masuk Boot Menu
-
-Biasanya:
+Masuk boot menu:
 
 | Brand | Tombol |
 |---|---|
@@ -82,32 +75,50 @@ Biasanya:
 | Acer | F12 |
 | Lenovo | F12 |
 | MSI | F11 |
-| Gigabyte | F12 |
 
 Pilih:
-- UEFI USB
+
+```txt
+UEFI: USB FLASHDISK
+```
+
+> Jangan pilih yang tanpa tulisan UEFI kalau mau install UEFI.
 
 ---
 
-# 🌐 Cek Internet
+# 🌐 Connect WiFi
 
-## WiFi
+## Untuk Laptop / WiFi
+
+Masuk iwctl:
 
 ```bash
 iwctl
 ```
 
-Masuk ke iwctl:
+Scan WiFi:
 
 ```bash
 device list
 station wlan0 scan
 station wlan0 get-networks
+```
+
+Connect WiFi:
+
+```bash
 station wlan0 connect NAMA_WIFI
+```
+
+Keluar:
+
+```bash
 exit
 ```
 
-## Test Internet
+---
+
+# 🌍 Test Internet
 
 ```bash
 ping google.com
@@ -123,13 +134,13 @@ timedatectl set-ntp true
 
 ---
 
-# 💽 Melihat Disk
+# 💽 Cek Disk
 
 ```bash
 lsblk
 ```
 
-Contoh disk:
+Contoh:
 
 ```txt
 nvme0n1
@@ -138,257 +149,325 @@ sda
 
 ---
 
-# 🧩 Membuat Partisi Arch Linux
+# 🧩 Membuat Partisi (Manual)
 
-## Masuk cfdisk
+## Jalankan cfdisk
 
 ```bash
 cfdisk /dev/nvme0n1
 ```
 
-> Ganti `nvme0n1` sesuai disk kalian.
+> Ganti sesuai disk kalian.
 
 ---
 
-# 📁 Partisi yang Dibutuhkan
+# 📁 Untuk UEFI Dual Boot
 
-## Root Partition
+## Jangan Hapus EFI Windows
 
-Buat:
+Biasanya:
+- FAT32
+- 100MB - 300MB
+
+Contoh:
+
+```txt
+/dev/nvme0n1p1
+```
+
+Itu dipakai bersama Windows.
+
+---
+
+# ➕ Buat Root Partition Baru
+
+Dari `Free Space`:
+
+Create:
+- Size:
+  - 30GB+
 - Type:
   - Linux filesystem
-- Size:
-  - 20GB+
 
-## Swap Partition (Opsional)
+Contoh:
 
-Buat:
+```txt
+/dev/nvme0n1p5
+```
+
+---
+
+# 💾 Optional Swap
+
+Bisa buat:
+- 2GB - 8GB
 - Type:
   - Linux swap
-- Size:
-  - 2GB - 8GB
 
 ---
 
-# 🧱 Format Partisi
+# ✅ Write Partition
 
-## Format Root
-
-```bash
-mkfs.ext4 /dev/nvme0n1pX
-```
-
-## Format Swap
-
-```bash
-mkswap /dev/nvme0n1pY
-swapon /dev/nvme0n1pY
-```
-
-> Ganti `X` dan `Y` sesuai nomor partisi.
-
----
-
-# 📂 Mount Partisi
-
-## Mount Root
-
-```bash
-mount /dev/nvme0n1pX /mnt
-```
-
-## Mount EFI Windows
-
-```bash
-mkdir -p /mnt/boot/efi
-mount /dev/nvme0n1p1 /mnt/boot/efi
-```
-
-> Biasanya partisi EFI Windows adalah `p1`
-
----
-
-# 📦 Install Base System
-
-```bash
-pacstrap /mnt base linux linux-firmware nano sudo networkmanager grub efibootmgr
-```
-
----
-
-# 🧬 Generate fstab
-
-```bash
-genfstab -U /mnt >> /mnt/etc/fstab
-```
-
----
-
-# 🔐 Masuk ke Arch
-
-```bash
-arch-chroot /mnt
-```
-
----
-
-# 🌍 Set Timezone
-
-## Indonesia WIB
-
-```bash
-ln -sf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
-hwclock --systohc
-```
-
----
-
-# 🌐 Setup Locale
-
-Edit locale:
-
-```bash
-nano /etc/locale.gen
-```
-
-Uncomment:
+Pilih:
 
 ```txt
-en_US.UTF-8 UTF-8
+Write
 ```
 
-Generate locale:
-
-```bash
-locale-gen
-```
-
-Buat locale.conf:
-
-```bash
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
-```
-
----
-
-# 🖥️ Hostname
-
-## Set Hostname
-
-```bash
-echo "archlinux" > /etc/hostname
-```
-
-Edit hosts:
-
-```bash
-nano /etc/hosts
-```
-
-Isi:
+Lalu:
 
 ```txt
-127.0.0.1 localhost
-::1 localhost
-127.0.1.1 archlinux.localdomain archlinux
+yes
 ```
 
----
-
-# 🔑 Set Password Root
-
-```bash
-passwd
-```
-
----
-
-# 👤 Membuat User
-
-## Tambah User
-
-```bash
-useradd -m -G wheel -s /bin/bash marcel
-passwd marcel
-```
-
----
-
-# ⚡ Enable Sudo
-
-```bash
-EDITOR=nano visudo
-```
-
-Uncomment:
+Kemudian:
 
 ```txt
-%wheel ALL=(ALL:ALL) ALL
+Quit
 ```
 
 ---
 
-# 🌐 Enable Internet
+# 🚀 Jalankan Archinstall
 
 ```bash
-systemctl enable NetworkManager
+archinstall
 ```
 
 ---
 
-# 🪟 Install GRUB Dual Boot
+# ⚙️ Konfigurasi Archinstall
 
-## Install GRUB
+---
 
-```bash
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Arch
-```
+# 🌍 Language
 
-## Install os-prober
-
-```bash
-pacman -S os-prober
-```
-
-Edit config:
-
-```bash
-nano /etc/default/grub
-```
-
-Uncomment:
+Pilih:
 
 ```txt
-GRUB_DISABLE_OS_PROBER=false
-```
-
-Generate config:
-
-```bash
-grub-mkconfig -o /boot/grub/grub.cfg
+English
 ```
 
 ---
 
-# 🚪 Exit & Reboot
+# ⌨️ Keyboard
+
+Pilih:
+
+```txt
+us
+```
+
+---
+
+# 🗺️ Mirror Region
+
+Pilih:
+
+```txt
+Indonesia
+```
+
+atau:
+
+```txt
+Worldwide
+```
+
+---
+
+# 💽 Disk Configuration
+
+Pilih:
+
+```txt
+Manual Partitioning
+```
+
+---
+
+# 🧱 Pilih Disk
+
+Contoh:
+
+```txt
+nvme0n1
+```
+
+---
+
+# 📁 Mount Point UEFI
+
+## EFI Windows
+
+Pilih partisi EFI Windows tadi.
+
+Contoh:
+
+```txt
+nvme0n1p1
+```
+
+Set:
+
+| Setting | Value |
+|---|---|
+| Mountpoint | `/boot/efi` |
+| Format | `NO` |
+
+> JANGAN FORMAT EFI kalau dual boot.
+
+---
+
+# 📂 Root Partition
+
+Pilih partisi Linux yang tadi dibuat.
+
+Contoh:
+
+```txt
+nvme0n1p5
+```
+
+Set:
+
+| Setting | Value |
+|---|---|
+| Filesystem | ext4 |
+| Mountpoint | `/` |
+| Format | YES |
+
+---
+
+# 💾 Swap Partition (Optional)
+
+Jika ada swap:
+
+| Setting | Value |
+|---|---|
+| Filesystem | linuxswap |
+| Mountpoint | none |
+
+---
+
+# 🖥️ Bootloader
+
+Pilih:
+
+```txt
+GRUB
+```
+
+---
+
+# 🌐 Hostname
+
+Contoh:
+
+```txt
+archlinux
+```
+
+---
+
+# 👤 Root Password
+
+Isi password root.
+
+---
+
+# 👤 User Account
+
+Buat user baru:
+
+| Setting | Example |
+|---|---|
+| Username | marcel |
+| Password | bebas |
+
+Centang:
+- sudo privileges
+
+---
+
+# 🌐 Network
+
+Pilih:
+
+```txt
+Use NetworkManager
+```
+
+---
+
+# 🖼️ Profile Desktop
+
+Pilih sesuai kebutuhan.
+
+Contoh:
+- Hyprland
+- KDE Plasma
+- GNOME
+- XFCE
+
+---
+
+# 🎮 Audio
+
+Pilih:
+
+```txt
+pipewire
+```
+
+---
+
+# 🚀 Install
+
+Pilih:
+
+```txt
+Install
+```
+
+Tunggu sampai selesai.
+
+---
+
+# 🔚 Setelah Selesai
+
+Pilih:
+
+```txt
+Yes
+```
+
+untuk:
+- chroot
+
+atau langsung:
 
 ```bash
-exit
-umount -R /mnt
 reboot
 ```
 
 ---
 
-# ✅ Setelah Reboot
+# 💽 Cabut Flashdisk
 
-GRUB akan muncul dengan pilihan:
-
-- Arch Linux
-- Windows Boot Manager
+Saat reboot:
+- cabut flashdisk
+- masuk ke GRUB
 
 ---
 
-# 🎉 Arch Linux Berhasil Diinstall
+# ✅ Hasil Akhir
 
-Welcome to ArchLinux
+GRUB akan muncul:
+
+```txt
+Arch Linux
+Windows Boot Manager
+```
+
+Dual boot berhasil 🎉
