@@ -1,23 +1,23 @@
-# 🐧 Arch Linux Dual Boot Installation (archinstall)
+# 🐧 Install Arch Linux Dual Boot (archinstall + Ventoy)
 
-> Install Arch Linux dual boot dengan Windows menggunakan `archinstall`.
+> Install Arch Linux dual boot dengan Windows pake cara paling gampang (`archinstall`).
 
 ---
 
 # 📦 Persiapan
 
-## Yang Dibutuhkan
+Yang dibutuhkan:
 
 - Flashdisk minimal 8GB
 - ISO Arch Linux
-- Rufus / Ventoy
-- Koneksi internet
+- Aplikasi Ventoy
+- Internet
 
 ---
 
 # 🔽 Download Arch Linux
 
-Official website:
+Download ISO:
 
 ```txt
 https://archlinux.org/download/
@@ -25,21 +25,40 @@ https://archlinux.org/download/
 
 ---
 
-# 🔥 Membuat Bootable USB
+# 🔥 Membuat Bootable USB (Ventoy)
 
-## Menggunakan Rufus
+## 1. Download Ventoy
 
-1. Buka Rufus
-2. Pilih flashdisk
-3. Select ISO Arch Linux
-4. Partition Scheme:
-   - GPT → UEFI
-   - MBR → BIOS / Legacy
-5. Klik Start
+```txt
+https://www.ventoy.net/
+```
+
+## 2. Install Ventoy ke Flashdisk
+
+- Buka Ventoy
+- Pilih flashdisk
+- Klik:
+  
+```txt
+Install
+```
+
+> Semua isi flashdisk akan kehapus.
 
 ---
 
-# ⚠️ Persiapan Windows Dual Boot
+# 📂 Masukkan ISO Arch
+
+Setelah Ventoy selesai:
+
+- buka flashdisk
+- copy file ISO Arch Linux ke flashdisk
+
+Selesai ✅
+
+---
+
+# ⚠️ Persiapan Windows
 
 ## Disable Fast Startup
 
@@ -47,7 +66,10 @@ https://archlinux.org/download/
 2. Power Options
 3. Choose what the power buttons do
 4. Disable:
-   - `Turn on fast startup`
+
+```txt
+Turn on fast startup
+```
 
 ---
 
@@ -55,17 +77,36 @@ https://archlinux.org/download/
 
 ## Dari Windows
 
-1. Tekan `Win + X`
-2. Disk Management
+1. Tekan:
+
+```txt
+Win + X
+```
+
+2. Pilih:
+
+```txt
+Disk Management
+```
+
 3. Klik kanan drive Windows
-4. Shrink Volume
+4. Pilih:
+
+```txt
+Shrink Volume
+```
+
 5. Sisakan:
-   - 30GB+
-   - Akan menjadi `Unallocated`
+- 30GB+
+- nanti jadi:
+
+```txt
+Unallocated
+```
 
 ---
 
-# 🚀 Boot ke Arch Linux
+# 🚀 Boot ke Ventoy
 
 Masuk boot menu:
 
@@ -79,27 +120,41 @@ Masuk boot menu:
 Pilih:
 
 ```txt
-UEFI: USB FLASHDISK
+UEFI: Ventoy
 ```
 
-> Jangan pilih yang tanpa tulisan UEFI kalau mau install UEFI.
+> WAJIB pilih yang ada tulisan UEFI.
+
+---
+
+# ▶️ Boot ISO Arch
+
+Di menu Ventoy:
+
+- pilih ISO Arch Linux
+- enter
 
 ---
 
 # 🌐 Connect WiFi
 
-## Untuk Laptop / WiFi
+Kalau pake LAN skip bagian ini.
 
-Masuk iwctl:
+Masuk WiFi setup:
 
 ```bash
 iwctl
 ```
 
-Scan WiFi:
+Lihat device:
 
 ```bash
 device list
+```
+
+Scan WiFi:
+
+```bash
 station wlan0 scan
 station wlan0 get-networks
 ```
@@ -124,111 +179,13 @@ exit
 ping google.com
 ```
 
----
-
-# 🕒 Sinkronisasi Waktu
-
-```bash
-timedatectl set-ntp true
-```
+Kalau muncul reply berarti aman ✅
 
 ---
 
-# 💽 Cek Disk
+# 🚀 Mulai Install Arch
 
-```bash
-lsblk
-```
-
-Contoh:
-
-```txt
-nvme0n1
-sda
-```
-
----
-
-# 🧩 Membuat Partisi (Manual)
-
-## Jalankan cfdisk
-
-```bash
-cfdisk /dev/nvme0n1
-```
-
-> Ganti sesuai disk kalian.
-
----
-
-# 📁 Untuk UEFI Dual Boot
-
-## Jangan Hapus EFI Windows
-
-Biasanya:
-- FAT32
-- 100MB - 300MB
-
-Contoh:
-
-```txt
-/dev/nvme0n1p1
-```
-
-Itu dipakai bersama Windows.
-
----
-
-# ➕ Buat Root Partition Baru
-
-Dari `Free Space`:
-
-Create:
-- Size:
-  - 30GB+
-- Type:
-  - Linux filesystem
-
-Contoh:
-
-```txt
-/dev/nvme0n1p5
-```
-
----
-
-# 💾 Optional Swap
-
-Bisa buat:
-- 2GB - 8GB
-- Type:
-  - Linux swap
-
----
-
-# ✅ Write Partition
-
-Pilih:
-
-```txt
-Write
-```
-
-Lalu:
-
-```txt
-yes
-```
-
-Kemudian:
-
-```txt
-Quit
-```
-
----
-
-# 🚀 Jalankan Archinstall
+Jalankan:
 
 ```bash
 archinstall
@@ -236,7 +193,7 @@ archinstall
 
 ---
 
-# ⚙️ Konfigurasi Archinstall
+# ⚙️ Setting Archinstall
 
 ---
 
@@ -268,12 +225,6 @@ Pilih:
 Indonesia
 ```
 
-atau:
-
-```txt
-Worldwide
-```
-
 ---
 
 # 💽 Disk Configuration
@@ -281,72 +232,33 @@ Worldwide
 Pilih:
 
 ```txt
-Manual Partitioning
+Use best-effort default partition layout
 ```
 
 ---
 
-# 🧱 Pilih Disk
+# ⚠️ IMPORTANT DUAL BOOT
 
-Contoh:
+JANGAN pilih disk Windows utama kalau ada data penting.
+
+Pilih:
+- partisi kosong hasil shrink tadi
+
+atau:
 
 ```txt
-nvme0n1
+Free Space
 ```
 
 ---
 
-# 📁 Mount Point UEFI
+# 🧱 Filesystem
 
-## EFI Windows
-
-Pilih partisi EFI Windows tadi.
-
-Contoh:
+Pilih:
 
 ```txt
-nvme0n1p1
+ext4
 ```
-
-Set:
-
-| Setting | Value |
-|---|---|
-| Mountpoint | `/boot/efi` |
-| Format | `NO` |
-
-> JANGAN FORMAT EFI kalau dual boot.
-
----
-
-# 📂 Root Partition
-
-Pilih partisi Linux yang tadi dibuat.
-
-Contoh:
-
-```txt
-nvme0n1p5
-```
-
-Set:
-
-| Setting | Value |
-|---|---|
-| Filesystem | ext4 |
-| Mountpoint | `/` |
-| Format | YES |
-
----
-
-# 💾 Swap Partition (Optional)
-
-Jika ada swap:
-
-| Setting | Value |
-|---|---|
-| Filesystem | linuxswap |
-| Mountpoint | none |
 
 ---
 
@@ -378,15 +290,18 @@ Isi password root.
 
 # 👤 User Account
 
-Buat user baru:
+Buat user:
 
-| Setting | Example |
+| Setting | Contoh |
 |---|---|
 | Username | marcel |
 | Password | bebas |
 
 Centang:
-- sudo privileges
+
+```txt
+Use sudo
+```
 
 ---
 
@@ -400,7 +315,7 @@ Use NetworkManager
 
 ---
 
-# 🖼️ Profile Desktop
+# 🖼️ Desktop Environment
 
 Pilih sesuai kebutuhan.
 
@@ -412,12 +327,22 @@ Contoh:
 
 ---
 
-# 🎮 Audio
+# 🔊 Audio
 
 Pilih:
 
 ```txt
 pipewire
+```
+
+---
+
+# 📦 Kernel
+
+Pilih:
+
+```txt
+linux
 ```
 
 ---
@@ -436,38 +361,27 @@ Tunggu sampai selesai.
 
 # 🔚 Setelah Selesai
 
-Pilih:
-
-```txt
-Yes
-```
-
-untuk:
-- chroot
-
-atau langsung:
+Ketik:
 
 ```bash
 reboot
 ```
 
----
-
-# 💽 Cabut Flashdisk
-
-Saat reboot:
+Lalu:
 - cabut flashdisk
-- masuk ke GRUB
 
 ---
 
 # ✅ Hasil Akhir
 
-GRUB akan muncul:
+Saat nyala akan muncul:
 
 ```txt
-Arch Linux
-Windows Boot Manager
+GRUB
 ```
+
+Isi:
+- Arch Linux
+- Windows Boot Manager
 
 Dual boot berhasil 🎉
