@@ -2,6 +2,14 @@
 
 > Install Arch Linux dual boot dengan Windows pake cara paling gampang (`archinstall`).
 
+# NOTE
+Resiko tanggung sendiri seperti :
+  - windows ke format
+  - gagal booting
+  - dll
+
+# PENTING!!
+Pastikan teliti saat partisi cek dulu patisinya yang ada salah dikit kelar
 ---
 
 # 📦 Persiapan
